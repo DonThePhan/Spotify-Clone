@@ -55,7 +55,7 @@ export default function Player(props) {
 	// while song is playing, update song 'progress' every 200 ms
 	useEffect(
 		() => {
-			if (play && !userChangingSongTime) {
+			if (play && !userChangingSongTime && audio.currentTime !== audio.duration) {
 				progressTimer = setTimeout(() => {
 					// this will cause rerender because the 'progress' hook is updated (w/ new value)
 					setProgress(Math.round(audio.currentTime / duration * 100 * 10) / 10);
@@ -68,17 +68,17 @@ export default function Player(props) {
 	// reset song when finished
 	useEffect(
 		() => {
-			if (progress === 100) {
-				audio.currentTime = 0;
-				setProgress(0);
-				togglePlay();
-
+			if (progress === 100 && !userChangingSongTime) {
 				if (repeat) {
 					togglePlay();
+					setProgress(0);
+					togglePlay();
+				} else {
+					nextSongHandler();
 				}
 			}
 		},
-		[ progress, repeat, audio, togglePlay ]
+		[ progress, userChangingSongTime /*, repeat, togglePlay*/ ]
 	);
 
 	function toggleRepeat() {
@@ -94,18 +94,18 @@ export default function Player(props) {
 		nextSong(shuffle);
 	}
 	function prevSongHandler() {
-		if (audio.currentTime < 1) {
+		if (audio.currentTime > 1) {
 			// start from the beginning of current song
 			setProgress(0);
 			audio.currentTime = 0;
 		} else {
 			// go to previous song
-			if (!shuffe) {
+			if (!shuffle) {
 				audio.pause();
 				setProgress(0);
 				prevSong();
-            } else {
-                // prev shuffle history
+			} else {
+				// prev shuffle history
 			}
 		}
 	}

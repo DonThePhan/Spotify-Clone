@@ -20,12 +20,14 @@ export default function ProgressSlider(props) {
 	const classes = useStyles();
 	const { progress, setProgress, progressTimer, audio, duration, setUserChangingSongTime } = props;
 
+    // when you let go of the drag icon
 	const handleSliderCommit = async (event, newValue) => {
 		audio.currentTime = newValue / 100 * duration;
 		setUserChangingSongTime(false);
 	};
 
-	const handleSliderChange = (event, newValue) => {
+    // when you click on the drag icon
+    const handleSliderChange = (event, newValue) => {
 		setProgress(newValue);
 		clearTimeout(progressTimer);
 		setUserChangingSongTime(true);
