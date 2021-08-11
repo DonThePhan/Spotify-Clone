@@ -1,0 +1,31 @@
+:root {
+	--control_bar_height: 100px;
+	--lists_width: 250px;
+}
+
+.body {
+	height: calc(100vh - var(--control_bar_height));
+	width: 100%;
+	background: red;
+	display: flex;
+	flex-direction: row;
+}
+
+.lists {
+	height: 100%;
+	width: var(--lists_width);
+	background-color: hsl(0, 0%, 0%);
+    /* border-right: 1px white solid; */
+}
+
+.explore {
+	height: 100%;
+	width: calc(100vw - var(--lists_width));
+	background-color: hsl(0, 0%, 7%);
+}
+
+.controls {
+	height: var(--control_bar_height);
+	background-color: hsl(0, 0%, 10%);
+	border-top: 1px solid hsl(0, 0%, 40%);
+}

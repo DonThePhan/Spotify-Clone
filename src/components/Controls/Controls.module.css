@@ -1,0 +1,41 @@
+.controls {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.controls_controls,
+.controls_album,
+.controls_peripheral_controls {
+	height: 100%;
+}
+
+.controls_controls {
+	width: 40%;
+}
+
+.song_info {
+	padding: 20px;
+}
+
+.controls_album {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 15px;
+	width: 30%;
+}
+
+.controls_peripheral_controls {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+	width: 30%;
+	padding-right: 40px;
+}
+
+.controls_album img {
+	height: 100%;
+}
