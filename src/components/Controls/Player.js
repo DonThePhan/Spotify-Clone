@@ -16,16 +16,89 @@ export default function Player(props) {
 	const [ userChangingSongTime, setUserChangingSongTime ] = useState(false);
 	const [ repeat, setRepeat ] = useState(false);
 	const [ shuffle, setShuffle ] = useState(false);
-	const [ shuffleSequence, setShuffleSequence ] = useState({});
+	const [ shufSeq, setShufSeq ] = useState({ curShufIndex: 0, shuffleList: [] });
+
+	function downHandler({ key }) {
+		console.log(shuffle);
+		if (key === ' ') {
+			togglePlay();
+		} else if (key === 'ArrowRight') {
+			nextSongHandler();
+		} else if (key === 'ArrowLeft') {
+			prevSongHandler();
+		}
+	}
+
+	// Add event listeners
+	useEffect(
+		() => {
+			window.addEventListener('keydown', downHandler);
+
+			// Remove event listeners on cleanup
+			return () => {
+				window.removeEventListener('keydown', downHandler);
+			};
+		},
+		[ downHandler ]
+	);
 
 	useEffect(
 		() => {
-			if (shuffle) {
-				setShuffleSequence({ index: songIndex, shuffleList: [ songIndex ] });
-			}
+			setShufSeq({ curShufIndex: 0, shuffleList: [ songIndex ] });
 		},
-		[ shuffle, setShuffleSequence ]
+		[ shuffle, setShufSeq ]
 	);
+
+	useEffect(
+		() => {
+			console.log(shufSeq);
+		},
+		[ shufSeq ]
+	);
+
+	function shuffleIfRequired(shuffle, direction, shuffleIndex = null) {
+		let indexReturnValue;
+
+		if (shuffle) {
+			if (direction === 'prev') {
+				if (shufSeq.curShufIndex === 0) {
+					indexReturnValue = 0;
+				} else {
+					indexReturnValue = shufSeq.curShufIndex - 1;
+				}
+				setShufSeq((prev) => {
+					if (prev.curShufIndex === 0) {
+						return prev;
+					} else {
+						return { ...prev, curShufIndex: prev.curShufIndex - 1 };
+					}
+				});
+				return shufSeq.shuffleList[indexReturnValue];
+			} else if (direction === 'next') {
+				if (shufSeq.curShufIndex === shufSeq.shuffleList.length - 1) {
+					indexReturnValue = shuffleIndex;
+				} else {
+					indexReturnValue = shufSeq.shuffleList[shufSeq.curShufIndex + 1];
+				}
+
+				setShufSeq((prev) => {
+					if (prev.curShufIndex === prev.shuffleList.length - 1) {
+						// if at end of shuffle list, add
+						return {
+							curShufIndex: prev.curShufIndex + 1,
+							shuffleList: [ ...prev.shuffleList, shuffleIndex ]
+						};
+					} else {
+						// if not the last song in list, just move index forward
+						return { ...prev, curShufIndex: prev.curShufIndex + 1 };
+					}
+				});
+				return indexReturnValue;
+			}
+		} else {
+			setShufSeq({ curShufIndex: 0, shuffleList: [] });
+		}
+	}
 
 	useEffect(
 		() => {
@@ -38,24 +111,26 @@ export default function Player(props) {
 	);
 
 	// play button mechanism
-	const togglePlay = useCallback(
+	function togglePlay() {
+		setPlay((prevPlay) => !prevPlay);
+	}
+	// handle player when song changes or play is toggled
+	useEffect(
 		() => {
-			setPlay((prevPlay) => {
-				if (prevPlay) {
-					audio.pause();
-				} else {
-					audio.play();
-				}
-				return !prevPlay;
-			});
+			if (play) {
+				audio.play();
+			} else {
+				audio.pause();
+			}
 		},
-		[ setPlay, audio ]
+		[ audio.src, play ]
 	);
 
 	// while song is playing, update song 'progress' every 200 ms
 	useEffect(
 		() => {
-			if (play && !userChangingSongTime) {
+			if (play && !userChangingSongTime && audio.currentTime !== audio.duration) {
+				console.log('progressing');
 				progressTimer = setTimeout(() => {
 					// this will cause rerender because the 'progress' hook is updated (w/ new value)
 					setProgress(Math.round(audio.currentTime / duration * 100 * 10) / 10);
@@ -68,17 +143,17 @@ export default function Player(props) {
 	// reset song when finished
 	useEffect(
 		() => {
-			if (progress === 100) {
+			if (audio.currentTime === duration && !userChangingSongTime) {
 				audio.currentTime = 0;
-				setProgress(0);
-				togglePlay();
-
 				if (repeat) {
-					togglePlay();
+					setProgress(0);
+					audio.play();
+				} else {
+					nextSongHandler();
 				}
 			}
 		},
-		[ progress, repeat, audio, togglePlay ]
+		[ audio.currentTime, duration, userChangingSongTime, repeat, togglePlay ]
 	);
 
 	function toggleRepeat() {
@@ -89,36 +164,15 @@ export default function Player(props) {
 	}
 
 	function nextSongHandler() {
-		audio.pause();
-		setProgress(0);
-		nextSong(shuffle);
+		nextSong(shuffle, shuffleIfRequired);
 	}
 	function prevSongHandler() {
-		if (audio.currentTime < 1) {
-			// start from the beginning of current song
-			setProgress(0);
-			audio.currentTime = 0;
+		if (audio.currentTime > 1) {
+			audio.currentTime = 0; // start from the beginning of CURRENT song
 		} else {
-			// go to previous song
-			if (!shuffe) {
-				audio.pause();
-				setProgress(0);
-				prevSong();
-            } else {
-                // prev shuffle history
-			}
+			prevSong(shuffle, shuffleIfRequired); // go to PREVIOUS song
 		}
 	}
-
-	// handle player when song changes
-	useEffect(
-		() => {
-			if (play) {
-				audio.play();
-			}
-		},
-		[ audio, play ]
-	);
 
 	return (
 		<div className={`${props.className} ${classes.player}`}>

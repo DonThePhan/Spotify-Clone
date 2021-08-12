@@ -1,14 +1,13 @@
 import classes from './Controls.module.css';
 import Player from './Player';
 import VolumeSlider from '../UI/VolumeSlider';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { useContext } from 'react';
 import MusicContext from '../Store/music-context';
 
 function Controls(props) {
-    const { currentSong, audio } = useContext(MusicContext);
-    const [volume, setVolume] = useState(100)
+    const { currentSong, audio, volume, setVolume } = useContext(MusicContext);
 
     useEffect(() => {
         audio.volume = volume/100

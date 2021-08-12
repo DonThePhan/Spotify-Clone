@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// const initialMusic = {
-// 	title: 'Kissing Other People',
-// 	album: 'Three. Two. One',
-// 	albumArt: `/images/Lennon_Stella_-_Three_Two_One.png`,
-// 	location: `/music/Lennon Stella - Kissing Other People.mp3`
-// };
-
-const initialMusic = [
+export const initialMusic = [
 	{
 		title: 'Kissing Other People',
 		artist: 'Lennon Stella',
@@ -87,27 +80,47 @@ const initialMusic = [
 	}
 ];
 
+const initialPlaylists = [
+	{
+		title: 'High Energy',
+		list: initialMusic.filter((song, index) => [ 2, 4, 9, 10 ].includes(index))
+	},
+	{
+		title: 'Relaxing',
+		list: initialMusic.filter((song, index) => [ 3, 6, 7, 8 ].includes(index))
+	}
+];
+
+console.log(initialPlaylists);
+
 const MusicContext = React.createContext({
 	songCount: {},
 	currentSong: {},
 	volume: 100,
+	setVolume: () => {},
 	audio: undefined,
 	nextSong: () => {},
-	prevSong: () => {}
+	prevSong: () => {},
+	playlists: [],
+	addToPlaylist: () => {}
 });
+
+// must always refer to same object (or will up having multiple songs playing at once when changing songs), therefore no useState since changing song require new object
+const audio = new Audio();
 
 export const MusicContextProvider = (props) => {
 	const [ volume, setVolume ] = useState(100);
-
 	const [ playlist, setPlaylist ] = useState(initialMusic);
 	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: playlist.length });
 	const [ currentSong, setCurrentSong ] = useState(playlist[songCount.songIndex]);
-	const [ audio, setAudio ] = useState(new Audio(currentSong.location));
+	const [ playlists, setPlaylists ] = useState(initialPlaylists);
 
-	function nextSong(shuffle) {
+	function nextSong(shuffle, shuffleIfRequired) {
 		if (shuffle) {
+			let newSongIndex = Math.floor(Math.random() * songCount.songIndexTotal);
+			newSongIndex = shuffleIfRequired(shuffle, 'next', newSongIndex);
 			setSongCount((prev) => {
-				return { ...prev, songIndex: Math.floor(Math.random() * prev.songIndexTotal) % prev.songIndexTotal };
+				return { ...prev, songIndex: newSongIndex };
 			});
 		} else {
 			setSongCount((prev) => {
@@ -115,9 +128,15 @@ export const MusicContextProvider = (props) => {
 			});
 		}
 	}
-	function prevSong() {
+	function prevSong(shuffle, shuffleIfRequired) {
 		setSongCount((prev) => {
-			return { ...prev, songIndex: (prev.songIndex + prev.songIndexTotal + -1) % prev.songIndexTotal };
+			if (shuffle) {
+				let newSongIndex = shuffleIfRequired(shuffle, 'prev');
+				console.log(newSongIndex);
+				return { ...prev, songIndex: newSongIndex };
+			} else {
+				return { ...prev, songIndex: (prev.songIndex + prev.songIndexTotal + -1) % prev.songIndexTotal };
+			}
 		});
 	}
 
@@ -130,18 +149,26 @@ export const MusicContextProvider = (props) => {
 	);
 	useEffect(
 		() => {
-			setAudio(new Audio(currentSong.location));
+			audio.setAttribute('src', currentSong.location);
 		},
-		[ currentSong.location, setAudio ]
+		[ currentSong.location ]
 	);
+
+	function addToPlaylist(playlistTitle, title) {
+		const playlist = playlists.find((playlist) => playlist.title === playlistTitle);
+		playlist.list.push(initialMusic.find((song) => song.title === title));
+	}
 
 	const value = {
 		songCount,
 		currentSong,
 		volume,
+		setVolume,
 		audio,
 		prevSong,
-		nextSong
+		nextSong,
+		playlists,
+		addToPlaylist
 	};
 
 	return <MusicContext.Provider value={value}>{props.children}</MusicContext.Provider>;

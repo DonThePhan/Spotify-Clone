@@ -20,20 +20,22 @@ export default function ProgressSlider(props) {
 	const classes = useStyles();
 	const { progress, setProgress, progressTimer, audio, duration, setUserChangingSongTime } = props;
 
+    // when you let go of the drag icon
 	const handleSliderCommit = async (event, newValue) => {
 		audio.currentTime = newValue / 100 * duration;
 		setUserChangingSongTime(false);
 	};
 
-	const handleSliderChange = (event, newValue) => {
-		setProgress(newValue);
+    // when you click on the drag icon
+    const handleSliderChange = (event, newValue) => {
+		setProgress(newValue); // so the slider follows the mouse on drag
 		clearTimeout(progressTimer);
 		setUserChangingSongTime(true);
 	};
 
-	timeStamp = `${Math.floor(progress / 100 * duration / 60)}:${(progress / 100 * duration) % 60 < 10
+	timeStamp = `${Math.floor(audio.currentTime / 60)}:${audio.currentTime < 10
 		? '0'
-		: ''}${Math.round((progress / 100 * duration) % 60)}`;
+		: ''}${Math.floor(audio.currentTime % 60)}`;
 	runTime = `${Math.floor(duration / 60)}:${Math.round(duration % 60)}`;
 	if (timeStamp === 'NaN:NaN') {
 		timeStamp = '0:00';
