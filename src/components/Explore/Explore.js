@@ -1,9 +1,12 @@
-import classes from './Explore.module.css'
+import classes from './Explore.module.css';
+import AllSongs from './AllSongs';
 
 function Explore(props) {
-    return <div className={`${props.className}`}>
-        <p>Explore</p>
-    </div>
+	return (
+		<div className={`${props.className}`}>
+			<AllSongs />
+		</div>
+	);
 }
 
-export default Explore
+export default Explore;

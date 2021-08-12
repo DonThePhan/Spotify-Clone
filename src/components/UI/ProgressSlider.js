@@ -28,14 +28,14 @@ export default function ProgressSlider(props) {
 
     // when you click on the drag icon
     const handleSliderChange = (event, newValue) => {
-		setProgress(newValue);
+		setProgress(newValue); // so the slider follows the mouse on drag
 		clearTimeout(progressTimer);
 		setUserChangingSongTime(true);
 	};
 
-	timeStamp = `${Math.floor(progress / 100 * duration / 60)}:${(progress / 100 * duration) % 60 < 10
+	timeStamp = `${Math.floor(audio.currentTime / 60)}:${audio.currentTime < 10
 		? '0'
-		: ''}${Math.round((progress / 100 * duration) % 60)}`;
+		: ''}${Math.floor(audio.currentTime % 60)}`;
 	runTime = `${Math.floor(duration / 60)}:${Math.round(duration % 60)}`;
 	if (timeStamp === 'NaN:NaN') {
 		timeStamp = '0:00';
