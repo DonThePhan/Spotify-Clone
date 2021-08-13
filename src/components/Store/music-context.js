@@ -91,9 +91,9 @@ const initialPlaylists = [
 	}
 ];
 
-console.log(initialPlaylists);
-
 const MusicContext = React.createContext({
+	play: false,
+	setPlay: () => {},
 	songCount: {},
 	currentSong: {},
 	volume: 100,
@@ -101,19 +101,23 @@ const MusicContext = React.createContext({
 	audio: undefined,
 	nextSong: () => {},
 	prevSong: () => {},
+	currentPlaylist: [],
+	changePlaylist: () => {},
 	playlists: [],
-	addToPlaylist: () => {}
+	addToPlaylist: () => {},
+	playClickedPlaylistSong: () => {}
 });
 
 // must always refer to same object (or will up having multiple songs playing at once when changing songs), therefore no useState since changing song require new object
 const audio = new Audio();
 
 export const MusicContextProvider = (props) => {
+	const [ play, setPlay ] = useState(false);
 	const [ volume, setVolume ] = useState(100);
-	const [ playlist, setPlaylist ] = useState(initialMusic);
-	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: playlist.length });
-	const [ currentSong, setCurrentSong ] = useState(playlist[songCount.songIndex]);
-	const [ playlists, setPlaylists ] = useState(initialPlaylists);
+	const [ playlists, setPlaylists ] = useState([ { title: 'All Songs', list: initialMusic }, ...initialPlaylists ]);
+	const [ currentPlaylist, setCurrentPlaylist ] = useState(playlists[0]);
+	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: currentPlaylist.list.length });
+	const [ currentSong, setCurrentSong ] = useState(currentPlaylist.list[songCount.songIndex]);
 
 	function nextSong(shuffle, shuffleIfRequired) {
 		if (shuffle) {
@@ -132,7 +136,6 @@ export const MusicContextProvider = (props) => {
 		setSongCount((prev) => {
 			if (shuffle) {
 				let newSongIndex = shuffleIfRequired(shuffle, 'prev');
-				console.log(newSongIndex);
 				return { ...prev, songIndex: newSongIndex };
 			} else {
 				return { ...prev, songIndex: (prev.songIndex + prev.songIndexTotal + -1) % prev.songIndexTotal };
@@ -143,9 +146,9 @@ export const MusicContextProvider = (props) => {
 	//chain effects after nextSong/prevSong
 	useEffect(
 		() => {
-			setCurrentSong(playlist[songCount.songIndex]);
+			setCurrentSong(currentPlaylist.list[songCount.songIndex]);
 		},
-		[ setCurrentSong, playlist, songCount.songIndex ]
+		[ setCurrentSong, currentPlaylist.list, songCount.songIndex ]
 	);
 	useEffect(
 		() => {
@@ -155,11 +158,47 @@ export const MusicContextProvider = (props) => {
 	);
 
 	function addToPlaylist(playlistTitle, title) {
-		const playlist = playlists.find((playlist) => playlist.title === playlistTitle);
-		playlist.list.push(initialMusic.find((song) => song.title === title));
+		const song = initialMusic.find((song) => song.title === title);
+		setPlaylists((prevPlaylists) => {
+			const newPlaylists = prevPlaylists.map((playlist) => {
+				if (playlist.title === playlistTitle) {
+					return {
+						title: playlist.title,
+						list: [ ...playlist.list, song ]
+					};
+				}
+				return playlist;
+			});
+			return newPlaylists;
+		});
+	}
+
+	function playClickedPlaylistSong(selectedSong) {
+		setPlay(true);
+		setSongCount((prev) => {
+            let newIndex;
+
+			for (let i = 0; i < currentPlaylist.list.length; i++) {
+				if (currentPlaylist.list[i].title === selectedSong.title) {
+					newIndex = i;
+				}
+			}
+
+			return {
+				...prev,
+				songIndex: newIndex
+			};
+		});
+	}
+
+	function changePlaylist(title) {
+		setPlay(true);
+		setCurrentPlaylist(playlists.find((playlist) => playlist.title === title));
 	}
 
 	const value = {
+		play,
+		setPlay,
 		songCount,
 		currentSong,
 		volume,
@@ -167,8 +206,11 @@ export const MusicContextProvider = (props) => {
 		audio,
 		prevSong,
 		nextSong,
+		currentPlaylist,
+		changePlaylist,
 		playlists,
-		addToPlaylist
+		addToPlaylist,
+		playClickedPlaylistSong
 	};
 
 	return <MusicContext.Provider value={value}>{props.children}</MusicContext.Provider>;

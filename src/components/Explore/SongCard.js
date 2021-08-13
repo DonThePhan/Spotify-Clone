@@ -4,7 +4,7 @@ import classes from './SongCard.module.css';
 
 export default function SongCard(props) {
 	const { currentSong: { title: curTitle }, playlists, addToPlaylist } = useContext(MusicContext);
-	const { title, artist, album, albumArt, location } = props.song;
+	const { title, artist, album, albumArt } = props.song;
 	const [ addToPlaylistPopUp, setAddToPlaylistPopUp ] = useState(false);
 
 	function addToPlaylistButtonClickHandler() {
@@ -17,7 +17,7 @@ export default function SongCard(props) {
 	}
 
 	return (
-		<div className={classes.songCard}>
+		<div onDoubleClick={props.onDoubleClick} className={classes.songCard}>
 			<img className={classes.img} src={albumArt} alt="" />
 			<div className={classes.titleAndArtist}>
 				<p className={curTitle === title ? classes.playing : null}>{title}</p>

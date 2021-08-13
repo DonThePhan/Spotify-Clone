@@ -1,7 +1,14 @@
+.button {
+	background-color: transparent;
+	outline: none;
+    font-size: 1em;
+    padding: .125em;
+}
+
 .button:hover {
-    color: white;
+	color: white;
 }
 
 .button i:hover {
-    color: white;
+	color: white;
 }

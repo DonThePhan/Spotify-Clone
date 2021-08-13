@@ -7,11 +7,14 @@ import { useContext } from 'react';
 import MusicContext from '../Store/music-context';
 
 function Controls(props) {
-    const { currentSong, audio, volume, setVolume } = useContext(MusicContext);
+	const { currentSong, audio, volume, setVolume } = useContext(MusicContext);
 
-    useEffect(() => {
-        audio.volume = volume/100
-    }, [volume, audio])
+	useEffect(
+		() => {
+			audio.volume = volume / 100;
+		},
+		[ volume, audio ]
+	);
 
 	return (
 		<div className={`${props.className} ${classes.controls}`}>
@@ -24,7 +27,7 @@ function Controls(props) {
 			</div>
 			<Player className={classes.controls_controls} />
 			<div className={classes.controls_peripheral_controls}>
-                <VolumeSlider volume={volume} setVolume={setVolume}/>
+				<VolumeSlider volume={volume} setVolume={setVolume} />
 			</div>
 		</div>
 	);

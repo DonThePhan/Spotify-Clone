@@ -5,4 +5,5 @@
 	font-family: Roboto, Arial, sans-serif;
 	box-sizing: border-box;
 	color: hsl(0, 0%, 75%);
+    user-select:none;
 }

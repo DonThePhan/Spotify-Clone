@@ -1,0 +1,24 @@
+.allSongs {
+	height: 100%;
+	width: 100%;
+	padding: 50px;
+	overflow-y: scroll;
+}
+
+.allSongs::-webkit-scrollbar {
+    border-radius: .5em;
+}
+
+.allSongs::-webkit-scrollbar-track {
+
+	box-shadow: inset 0 0 6px rgba(0, 0, 0);
+}
+.allSongs::-webkit-scrollbar-thumb {
+    border-radius: .5em;
+	background-color: darkslategray;
+	/* outline: 1px solid slategrey; */
+}
+
+.playlistTitle {
+	padding: 15px;
+}
