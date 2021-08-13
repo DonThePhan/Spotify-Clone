@@ -1,16 +1,14 @@
 import classes from './Player.module.css';
 import Button from '../UI/Button';
 import ProgressSlider from '../UI/ProgressSlider';
-import { useEffect, useState, useContext, useCallback } from 'react';
+import { useEffect, useState, useContext } from 'react';
 
 import MusicContext from '../Store/music-context';
 
 let progressTimer;
 
 export default function Player(props) {
-	const [ play, setPlay ] = useState(false);
-
-	const { audio, prevSong, nextSong, songCount: { songIndex, songIndexTotal } } = useContext(MusicContext);
+	const { play, setPlay, audio, prevSong, nextSong, songCount: { songIndex } } = useContext(MusicContext);
 	const [ duration, setDuration ] = useState(audio.duration);
 	const [ progress, setProgress ] = useState(0);
 	const [ userChangingSongTime, setUserChangingSongTime ] = useState(false);
@@ -47,13 +45,6 @@ export default function Player(props) {
 			setShufSeq({ curShufIndex: 0, shuffleList: [ songIndex ] });
 		},
 		[ shuffle, setShufSeq ]
-	);
-
-	useEffect(
-		() => {
-			console.log(shufSeq);
-		},
-		[ shufSeq ]
 	);
 
 	function shuffleIfRequired(shuffle, direction, shuffleIndex = null) {
@@ -130,7 +121,6 @@ export default function Player(props) {
 	useEffect(
 		() => {
 			if (play && !userChangingSongTime && audio.currentTime !== audio.duration) {
-				console.log('progressing');
 				progressTimer = setTimeout(() => {
 					// this will cause rerender because the 'progress' hook is updated (w/ new value)
 					setProgress(Math.round(audio.currentTime / duration * 100 * 10) / 10);
@@ -178,25 +168,25 @@ export default function Player(props) {
 		<div className={`${props.className} ${classes.player}`}>
 			<div className={classes.player_buttons}>
 				<Button onClick={toggleShuffle}>
-					<i className={`fas fa-random ${shuffle && classes.selected}`} />
+					<i className={`fas fa-random ${classes.player_button} ${shuffle && classes.selected}`} />
 				</Button>
 				<Button onClick={prevSongHandler}>
-					<i className="fas fa-step-backward" />
+					<i className={`fas fa-step-backward ${classes.player_button}`} />
 				</Button>
 				{play ? (
 					<Button onClick={togglePlay}>
-						<i className="fas fa-pause-circle fa-2x" />
+						<i className={`fas fa-pause-circle  ${classes.player_button_large}`} />
 					</Button>
 				) : (
 					<Button onClick={togglePlay}>
-						<i className="fas fa-play-circle fa-2x" />
+						<i className={`fas fa-play-circle  ${classes.player_button_large}`} />
 					</Button>
 				)}
 				<Button onClick={nextSongHandler}>
-					<i className="fas fa-step-forward  " />
+					<i className={`fas fa-step-forward ${classes.player_button}`} />
 				</Button>
 				<Button onClick={toggleRepeat}>
-					<i className={`fas fa-redo-alt ${repeat && classes.selected}`} />
+					<i className={`fas fa-redo-alt ${classes.player_button} ${repeat && classes.selected}`} />
 				</Button>
 			</div>
 			<ProgressSlider

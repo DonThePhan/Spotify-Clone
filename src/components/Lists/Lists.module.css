@@ -8,3 +8,14 @@
 li {
     list-style-type: none;
 }
+
+.playlists {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.selected {
+    color: rgb(0, 177, 0);
+}

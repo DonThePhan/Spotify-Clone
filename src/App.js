@@ -1,4 +1,4 @@
-import PlayerPage from './pages/player';
+import PlayerPage from './pages/Main';
 
 function App() {
 	return <PlayerPage />;

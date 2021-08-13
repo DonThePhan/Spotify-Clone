@@ -1,7 +1,7 @@
 import Lists from '../components/Lists/Lists';
 import Explore from '../components/Explore/Explore';
 import Controls from '../components/Controls/Controls';
-import classes from './player.module.css';
+import classes from './Main.module.css';
 
 function PlayerPage() {
 	return (

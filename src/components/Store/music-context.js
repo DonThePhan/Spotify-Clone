@@ -91,9 +91,9 @@ const initialPlaylists = [
 	}
 ];
 
-console.log(initialPlaylists);
-
 const MusicContext = React.createContext({
+	play: false,
+	setPlay: () => {},
 	songCount: {},
 	currentSong: {},
 	volume: 100,
@@ -102,6 +102,7 @@ const MusicContext = React.createContext({
 	nextSong: () => {},
 	prevSong: () => {},
 	currentPlaylist: [],
+	changePlaylist: () => {},
 	playlists: [],
 	addToPlaylist: () => {},
 	playClickedPlaylistSong: () => {}
@@ -111,11 +112,12 @@ const MusicContext = React.createContext({
 const audio = new Audio();
 
 export const MusicContextProvider = (props) => {
+	const [ play, setPlay ] = useState(false);
 	const [ volume, setVolume ] = useState(100);
-	const [ currentPlaylist, setCurrentPlaylist ] = useState(initialMusic);
-	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: currentPlaylist.length });
-	const [ currentSong, setCurrentSong ] = useState(currentPlaylist[songCount.songIndex]);
-	const [ playlists, setPlaylists ] = useState(initialPlaylists);
+	const [ playlists, setPlaylists ] = useState([ { title: 'All Songs', list: initialMusic }, ...initialPlaylists ]);
+	const [ currentPlaylist, setCurrentPlaylist ] = useState(playlists[0]);
+	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: currentPlaylist.list.length });
+	const [ currentSong, setCurrentSong ] = useState(currentPlaylist.list[songCount.songIndex]);
 
 	function nextSong(shuffle, shuffleIfRequired) {
 		if (shuffle) {
@@ -134,7 +136,6 @@ export const MusicContextProvider = (props) => {
 		setSongCount((prev) => {
 			if (shuffle) {
 				let newSongIndex = shuffleIfRequired(shuffle, 'prev');
-				console.log(newSongIndex);
 				return { ...prev, songIndex: newSongIndex };
 			} else {
 				return { ...prev, songIndex: (prev.songIndex + prev.songIndexTotal + -1) % prev.songIndexTotal };
@@ -145,9 +146,9 @@ export const MusicContextProvider = (props) => {
 	//chain effects after nextSong/prevSong
 	useEffect(
 		() => {
-			setCurrentSong(currentPlaylist[songCount.songIndex]);
+			setCurrentSong(currentPlaylist.list[songCount.songIndex]);
 		},
-		[ setCurrentSong, currentPlaylist, songCount.songIndex ]
+		[ setCurrentSong, currentPlaylist.list, songCount.songIndex ]
 	);
 	useEffect(
 		() => {
@@ -157,18 +158,31 @@ export const MusicContextProvider = (props) => {
 	);
 
 	function addToPlaylist(playlistTitle, title) {
-		const playlist = playlists.find((playlist) => playlist.title === playlistTitle);
-		playlist.list.push(initialMusic.find((song) => song.title === title));
+		const song = initialMusic.find((song) => song.title === title);
+		setPlaylists((prevPlaylists) => {
+			const newPlaylists = prevPlaylists.map((playlist) => {
+				if (playlist.title === playlistTitle) {
+					return {
+						title: playlist.title,
+						list: [ ...playlist.list, song ]
+					};
+				}
+				return playlist;
+			});
+			return newPlaylists;
+		});
 	}
 
 	function playClickedPlaylistSong(selectedSong) {
+		setPlay(true);
 		setSongCount((prev) => {
-            let newIndex
-            currentPlaylist.map((song, index) => {
-				if (song.title === selectedSong.title) {
-					newIndex =  index;
+            let newIndex;
+
+			for (let i = 0; i < currentPlaylist.list.length; i++) {
+				if (currentPlaylist.list[i].title === selectedSong.title) {
+					newIndex = i;
 				}
-			});
+			}
 
 			return {
 				...prev,
@@ -177,7 +191,14 @@ export const MusicContextProvider = (props) => {
 		});
 	}
 
+	function changePlaylist(title) {
+		setPlay(true);
+		setCurrentPlaylist(playlists.find((playlist) => playlist.title === title));
+	}
+
 	const value = {
+		play,
+		setPlay,
 		songCount,
 		currentSong,
 		volume,
@@ -186,6 +207,7 @@ export const MusicContextProvider = (props) => {
 		prevSong,
 		nextSong,
 		currentPlaylist,
+		changePlaylist,
 		playlists,
 		addToPlaylist,
 		playClickedPlaylistSong
