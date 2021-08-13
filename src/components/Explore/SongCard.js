@@ -17,7 +17,7 @@ export default function SongCard(props) {
 	}
 
 	return (
-		<div className={classes.songCard}>
+		<div onDoubleClick={props.onDoubleClick} className={classes.songCard}>
 			<img className={classes.img} src={albumArt} alt="" />
 			<div className={classes.titleAndArtist}>
 				<p className={curTitle === title ? classes.playing : null}>{title}</p>

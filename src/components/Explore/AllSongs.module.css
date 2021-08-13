@@ -1,0 +1,6 @@
+.allSongs {
+    height: 100%;
+    width: 100%;
+    padding: 50px;
+    overflow-y: scroll;
+}

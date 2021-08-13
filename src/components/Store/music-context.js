@@ -101,8 +101,10 @@ const MusicContext = React.createContext({
 	audio: undefined,
 	nextSong: () => {},
 	prevSong: () => {},
+	currentPlaylist: [],
 	playlists: [],
-	addToPlaylist: () => {}
+	addToPlaylist: () => {},
+	playClickedPlaylistSong: () => {}
 });
 
 // must always refer to same object (or will up having multiple songs playing at once when changing songs), therefore no useState since changing song require new object
@@ -110,9 +112,9 @@ const audio = new Audio();
 
 export const MusicContextProvider = (props) => {
 	const [ volume, setVolume ] = useState(100);
-	const [ playlist, setPlaylist ] = useState(initialMusic);
-	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: playlist.length });
-	const [ currentSong, setCurrentSong ] = useState(playlist[songCount.songIndex]);
+	const [ currentPlaylist, setCurrentPlaylist ] = useState(initialMusic);
+	const [ songCount, setSongCount ] = useState({ songIndex: 0, songIndexTotal: currentPlaylist.length });
+	const [ currentSong, setCurrentSong ] = useState(currentPlaylist[songCount.songIndex]);
 	const [ playlists, setPlaylists ] = useState(initialPlaylists);
 
 	function nextSong(shuffle, shuffleIfRequired) {
@@ -143,9 +145,9 @@ export const MusicContextProvider = (props) => {
 	//chain effects after nextSong/prevSong
 	useEffect(
 		() => {
-			setCurrentSong(playlist[songCount.songIndex]);
+			setCurrentSong(currentPlaylist[songCount.songIndex]);
 		},
-		[ setCurrentSong, playlist, songCount.songIndex ]
+		[ setCurrentSong, currentPlaylist, songCount.songIndex ]
 	);
 	useEffect(
 		() => {
@@ -159,6 +161,22 @@ export const MusicContextProvider = (props) => {
 		playlist.list.push(initialMusic.find((song) => song.title === title));
 	}
 
+	function playClickedPlaylistSong(selectedSong) {
+		setSongCount((prev) => {
+            let newIndex
+            currentPlaylist.map((song, index) => {
+				if (song.title === selectedSong.title) {
+					newIndex =  index;
+				}
+			});
+
+			return {
+				...prev,
+				songIndex: newIndex
+			};
+		});
+	}
+
 	const value = {
 		songCount,
 		currentSong,
@@ -167,8 +185,10 @@ export const MusicContextProvider = (props) => {
 		audio,
 		prevSong,
 		nextSong,
+		currentPlaylist,
 		playlists,
-		addToPlaylist
+		addToPlaylist,
+		playClickedPlaylistSong
 	};
 
 	return <MusicContext.Provider value={value}>{props.children}</MusicContext.Provider>;
