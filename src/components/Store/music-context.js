@@ -176,7 +176,7 @@ export const MusicContextProvider = (props) => {
 	function playClickedPlaylistSong(selectedSong) {
 		setPlay(true);
 		setSongCount((prev) => {
-            let newIndex;
+			let newIndex;
 
 			for (let i = 0; i < currentPlaylist.list.length; i++) {
 				if (currentPlaylist.list[i].title === selectedSong.title) {
@@ -193,7 +193,9 @@ export const MusicContextProvider = (props) => {
 
 	function changePlaylist(title) {
 		setPlay(true);
-		setCurrentPlaylist(playlists.find((playlist) => playlist.title === title));
+		const newPlaylist = playlists.find((playlist) => playlist.title === title);
+		setCurrentPlaylist(newPlaylist);
+		setSongCount({ songIndex: 0, songIndexTotal: newPlaylist.list.length });
 	}
 
 	const value = {
